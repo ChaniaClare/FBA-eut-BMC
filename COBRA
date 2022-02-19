@@ -1,0 +1,56 @@
+initCobraToolbox
+
+
+fileName = 'iDK1463.xml';
+if ~exist('modelOri','var')
+    modelOri = readCbModel(fileName);
+end
+%backward compatibility with primer requires relaxation of upper bound on
+%ATPM
+modelOri = changeRxnBounds(modelOri,'ATPM',1000,'u');
+model = modelOri;
+
+%See non-trivial constraints
+printConstraints(model,-1000,1000)
+
+%Set uptake in units of mmol gDW-1 hr-1 (millimoles per gram dry cell
+%weight per hour, the default flux units in COBRA Toolbox)
+%18.5 uptake of glucose is said to be a biologically realitic rate in the
+%tutorial
+%-1000 ~ unlimited/practically unbounded
+
+%By convention, exchange reactions written as export, so import is written
+%as a negative flux
+%Comment out and change values as necessary 
+model = changeRxnBounds(model,'EX_glc__D_e',-18.5,'l');
+model = changeRxnBounds(model,'EX_o2_e',-1000,'l'); 
+model = changeRxnBounds(model,'EX_glyc_e',0,'l'); 
+model = changeRxnBounds(model,'EX_etha_e',0,'l'); 
+model = changeRxnBounds(model,'EX_adocbl_e',0,'l'); 
+
+%By default objective function is set to biomass production, to change to the first reaction in the ethanolamine utilisation pathway:
+model = changeObjective(model,['ETHAAL']);
+
+%Ec_biomass_iJO1366_core_53p95M
+
+FBAsolution = optimizeCbModel(model,'max')
+
+%To get value of objective function in units of mmol gDW-1 hr-1, => growth
+%rate in unnits of hr-1
+FBAsolution.f
+
+%Flux distribution vector, this gives optimal flux vector
+FBAsolution.v
+%Make more convinient to read:
+fluxData = FBAsolution.v;
+nonZeroFlag = 1;
+printFluxVector(model, fluxData, nonZeroFlag)
+
+
+outputFormatOK = changeCbMapOutput('matlab');
+map=readCbMap('ecoli_core_map');
+options.zeroFluxWidth = 0.1;
+options.rxnDirMultiplier = 10;
+drawFlux(map, model, FBAsolution.v, options);
+
+help("printvectorflux")
