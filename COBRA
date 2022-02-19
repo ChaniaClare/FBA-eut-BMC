@@ -47,6 +47,7 @@ nonZeroFlag = 1;
 printFluxVector(model, fluxData, nonZeroFlag)
 
 
+%to create flux map using e coli core map
 outputFormatOK = changeCbMapOutput('matlab');
 map=readCbMap('ecoli_core_map');
 options.zeroFluxWidth = 0.1;
