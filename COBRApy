@@ -1,1 +1,34 @@
+import cobra
+model = cobra.io.read_sbml_model('/.../iDK1463.xml')
+cobra_config = cobra.Configuration()
 
+#Set the objective
+#Set to "ETHAAL" to optimise flux through the first reaction of the ethanolamine utilisation pathway
+model.objective = "BIOMASS_Ec_iDK1463_core_59p80M"
+print(model.objective)
+
+#View and set the medium
+#Change as required
+model.medium
+medium = model.medium
+medium["EX_glyc_e"] = 10.0
+medium["EX_glc__D_e"] = 0.0
+medium["EX_o2_e"] = 18.5
+model.medium = medium
+
+model.medium
+
+#Create and view production envelope
+#E.g. when objective function = biomass, and media contains glucose
+from cobra.flux_analysis import production_envelope
+cobra.Reaction("EX_glc__D_e", lower_bound=-30)
+prod_env = production_envelope(
+    model, ["EX_glc__D_e"], objective="BIOMASS_Ec_iDK1463_core_59p80M")
+
+prod_env.head()
+
+%matplotlib inline
+prod_env.plot(
+    kind='line', x='EX_glc__D_e', y='carbon_yield_maximum');   
+    
+#Adjust to change conditions as required
