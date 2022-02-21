@@ -53,5 +53,3 @@ map=readCbMap('ecoli_core_map');
 options.zeroFluxWidth = 0.1;
 options.rxnDirMultiplier = 10;
 drawFlux(map, model, FBAsolution.v, options);
-
-help("printvectorflux")
