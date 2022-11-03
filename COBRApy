@@ -3,7 +3,7 @@ model = cobra.io.read_sbml_model('/.../iDK1463.xml')
 cobra_config = cobra.Configuration()
 
 #Set the objective
-#Set to "ETHAAL" to optimise flux through the first reaction of the ethanolamine utilisation pathway
+#Can set to "ETHAAL" to optimise flux through the first reaction of the ethanolamine utilisation pathway
 model.objective = "BIOMASS_Ec_iDK1463_core_59p80M"
 print(model.objective)
 
