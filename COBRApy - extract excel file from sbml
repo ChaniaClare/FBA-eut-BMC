@@ -1,0 +1,90 @@
+## To compile an excel file of all reactions and metabolites from an sbml file
+
+## Nice accessible way to search through/visualise data in sbml
+## Have added extra tabs specifying only exchange reactions and extracellular metabolites
+##   to identify all possible input and output from the cells
+
+## To use a different model, input a different sbml file at the start. All call names from 
+##   there should be standardised. If not, can check by calling metabolites by name:
+##   ie.> model.metabolites.get_by_id("atp_c")
+
+
+import cobra
+import pandas as pd
+model = cobra.io.read_sbml_model('/.../iJO1366.xml')
+
+
+met_list = pd.DataFrame.from_dict(model.metabolites)
+reac_list = pd.DataFrame.from_dict(model.reactions)
+gene_list = pd.DataFrame.from_dict(model.genes)
+ex_reac_list = pd.DataFrame.from_dict(model.exchanges)
+dem_reac_list = pd.DataFrame.from_dict(model.demands)
+sink_reac_list = pd.DataFrame.from_dict(model.sinks)
+boun_reac_list = pd.DataFrame.from_dict(model.boundary)
+
+#Boundary reactions = exchange reactions - demand reactions (can check with comparing lengths) <br>
+#All metabolic reactions (internal reactions, not exchanges with the environments) can be found by 
+#subtracting the boundary reactions away from all reactions
+
+
+
+##Write subgroups of data that we want in each sheet in excel file into dataframes from the lists
+#For all metabolites:
+all_mets = []
+for x in model.metabolites:
+    all_mets.append(
+        {
+            'Metabolite Name': x.name,
+            'Metabolite ID': x.id,
+            'Formula': x.formula,
+            'Charge': x.charge,
+            'Compartment': x.compartment
+        }
+    )
+all_mets_df = pd.DataFrame(all_mets)
+all_mets_df
+
+#Subsection only the extracellular metabolites:
+exchange_mets_df = all_mets_df[all_mets_df.Compartment == 'e']
+print(exchange_mets_df)
+
+#All reactions:
+all_reac = []
+for x in model.reactions:
+    all_reac.append(
+        {
+            'Reaction ID': x.id,
+            'Reaction Name': x.name,
+            'Reaction': x.reaction,
+            'Lower bound': x.lower_bound,
+            'Upper bound': x.lower_bound,
+            'Subsystem': x.subsystem,
+        }
+    )
+all_reac_df = pd.DataFrame(all_reac)
+all_reac_df
+
+#Exchange reactions only:
+exchange_reac = []
+for x in model.exchanges:
+    exchange_reac.append(
+        {
+            'Reaction ID': x.id,
+            'Reaction Name': x.name,
+            'Reaction': x.reaction,
+            'Lower bound': x.lower_bound,
+            'Upper bound': x.lower_bound,
+            'Subsystem': x.subsystem,
+        }
+    )
+exchange_reac_df = pd.DataFrame(exchange_reac)
+exchange_reac_df
+
+#Write into excel, without the dataframe index in the first column
+with pd.ExcelWriter("/Users/chaniaclare/Documents/PhD/Cobrapy/iJO1366_CC.xlsx") as writer:
+    all_mets_df.to_excel(writer, sheet_name = "Metabolites", index = False)
+    all_reac_df.to_excel(writer, sheet_name = "Reactions", index = False)
+    exchange_mets_df.to_excel(writer, sheet_name = "Extracellular metabolites",index = False)
+    exchange_reac_df.to_excel(writer, sheet_name = "Exchange Reactions", index = False)
+
+#All done
