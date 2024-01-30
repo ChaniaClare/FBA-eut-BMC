@@ -9,6 +9,7 @@
 ##   ie.> model.metabolites.get_by_id("atp_c")
 
 
+import xlswriter
 import cobra
 import pandas as pd
 model = cobra.io.read_sbml_model('/.../iJO1366.xml')
